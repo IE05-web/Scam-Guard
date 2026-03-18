@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บอทป้องกันมิจฉาชีพ (เวอร์ชันสมบูรณ์)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f5f5f5;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .input-area {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .icon-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .icon-btn:hover {
+            background: #e0e0e0;
+            transform: scale(1.1);
+        }
+
+        .icon-btn.recording {
+            background: #ff4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        #userInput:focus {
+            border-color: #667eea;
+        }
+
+        #sendBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        #sendBtn:hover {
+            transform: scale(1.05);
+        }
+
+        .typing-indicator {
+            display: flex;
+            padding: 10px;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .image-preview {
+            max-width: 200px;
+            border-radius: 10px;
+            margin-top: 8px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            color: #856404;
+        }
+
+        .safe {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            color: #155724;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            color: #0c5460;
+        }
+
+        /* สำหรับมือถือ */
+        @media (max-width: 480px) {
+            .container {
+                height: 100vh;
+                max-width: 100%;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ บอทป้องกันมิจฉาชีพ</h1>
+            <p>AI ตอบคำถาม • วิเคราะห์รูป • รับเสียง</p>
+        </div>
+
+        <div class="chat-box" id="chatBox">
+            <div class="message bot">
+                <div class="message-bubble">👋 สวัสดีค่ะ! ฉันคือบอท AI ช่วยป้องกันมิจฉาชีพ
+
+คุณสามารถ:
+- 💬 ถามคำถามเกี่ยวกับการป้องกัน
+- 📷 ส่งรูปข้อความน่าสงสัยให้วิเคราะห์
+- 🎤 พูดคำถามแทนการพิมพ์
+
+ลองถามหรือส่งรูปได้เลยค่ะ! ✨</div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <!-- ปุ่มส่งรูป -->
+            <label for="imageInput" class="icon-btn" title="ส่งรูป">📷</label>
+            <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+            
+            <!-- ปุ่มบันทึกเสียง -->
+            <button id="voiceBtn" class="icon-btn" onclick="toggleVoiceRecording()" title="บันทึกเสียง">🎤</button>
+            
+            <!-- ช่องพิมพ์ข้อความ -->
+            <input type="text" id="userInput" placeholder="พิมพ์คำถาม..." onkeypress="handleKeyPress(event)">
+            
+            <!-- ปุ่มส่ง -->
+            <button id="sendBtn" onclick="sendMessage()">ส่ง</button>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ ใส่ Gemini API Key ของคุณตรงนี้
+        const GEMINI_API_KEY = 'AIzaSyDIgGe_CzrO05LOmc6z8sfoVkyC55Q0Hwg';
+        const GEMINI_API_URL = https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY};
+
+        // ตัวแปรสำหรับบันทึกเสียง
+        let recognition = null;
+        let isRecording = false;
+
+        // ฐานข้อมูลมิจฉาชีพตัวอย่าง
+        const scamDatabase = {
+            phones: {
+                '0812345678': {
+                    name: 'นายโกง ทดสอบ',
+                    type: 'โกงขายของ',
+                    reports: 15
+                },
+                '0898765432': {
+                    name: 'นางหลอก ทดลอง',
+                    type: 'ขอเงิน',
+                    reports: 8
+                }
+            }
+        };
+
+        // เริ่มต้น Speech Recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'th-TH';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                recognition.onstart = function() {
+                    isRecording = true;
+                    document.getElementById('voiceBtn').classList.add('recording');
+                    addMessage('<div class="info">🎤 <strong>กำลังฟัง...</strong><br>พูดคำถามได้เลยค่ะ</div>', false);
+                };
+                
+                recognition.onresult = async function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    
+                    // แสดงข้อความที่แปลงได้
+                    addMessage🗣️ "${transcript}"`, true);
+                    
+                    // ส่งไปประมวลผล
+                    showTyping();
+                    const response = await processMessage(transcript);
+                    hideTyping();
+                    addMessage(response, false);
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    let errorMsg = '❌ ไม่สามารถรับเสียงได้';
+                    
+                    if (event.error === 'no-speech') {
+                        errorMsg = '❌ ไม่ได้ยินเสียง กรุณาลองใหม่';
+                    } else if (event.error === 'not-allowed') {
+                        errorMsg = '❌ กรุณาอนุญาตให้ใช้ไมโครโฟน';
+                    }
+                    
+                    addMessage(<div class="warning">${errorMsg}</div>, false);
+                };
+                
+                recognition.onend = function() {
+                    isRecording = false;
+                    document.getElementById('voiceBtn').classList.remove('recording');
+                };
+            }
+        }
+
+        // เปิด/ปิดการบันทึกเสียง
+        func
